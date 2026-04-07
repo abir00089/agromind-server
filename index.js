@@ -4,27 +4,51 @@ const app = express();
 app.use(express.json());
 
 // Store latest sensor data
-let sensorData = {};
+let sensorData = {
+  soil_moisture: 0,
+  temperature: 0,
+  humidity: 0,
+  ph: 0
+};
 
-// POST API (ESP32 sends data here)
+// 📥 RECEIVE DATA FROM ESP32
 app.post("/data", (req, res) => {
-  sensorData = req.body;
-  console.log("📡 Received Data:", sensorData);
-  res.status(200).send("Data received successfully");
+  const { soil_moisture, temperature, humidity, ph } = req.body;
+
+  // ✅ Validate data (prevents HTTP 400 issues)
+  if (
+    soil_moisture === undefined ||
+    temperature === undefined ||
+    humidity === undefined ||
+    ph === undefined
+  ) {
+    return res.status(400).json({ error: "Missing fields" });
+  }
+
+  sensorData = {
+    soil_moisture,
+    temperature,
+    humidity,
+    ph
+  };
+
+  console.log("📡 Data received:", sensorData);
+
+  res.status(200).json({ message: "Data received successfully" });
 });
 
-// GET API (for Streamlit / browser)
-app.get("/", (req, res) => {
+// 📤 SEND DATA TO FRONTEND
+app.get("/data", (req, res) => {
   res.json(sensorData);
 });
 
-// Optional: check server health
-app.get("/health", (req, res) => {
-  res.send("Server is running 🚀");
+// 🌐 ROOT CHECK
+app.get("/", (req, res) => {
+  res.send("AgroMind Backend Running 🚀");
 });
 
+// PORT (Render compatible)
 const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
