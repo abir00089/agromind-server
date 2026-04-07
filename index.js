@@ -8,28 +8,30 @@ let sensorData = {
   soil_moisture: 0,
   temperature: 0,
   humidity: 0,
-  ph: 0
+  ph: 0,
+  pump: 1
 };
 
 // 📥 RECEIVE DATA FROM ESP32
 app.post("/data", (req, res) => {
-  const { soil_moisture, temperature, humidity, ph } = req.body;
+const { soil_moisture, temperature, humidity, ph, pump } = req.body;
 
-  // ✅ Validate data (prevents HTTP 400 issues)
-  if (
-    soil_moisture === undefined ||
-    temperature === undefined ||
-    humidity === undefined ||
-    ph === undefined
-  ) {
-    return res.status(400).json({ error: "Missing fields" });
-  }
+if (
+  soil_moisture === undefined ||
+  temperature === undefined ||
+  humidity === undefined ||
+  ph === undefined ||
+  pump === undefined
+) {
+  return res.status(400).json({ error: "Missing fields" });
+}
 
-  sensorData = {
-    soil_moisture,
-    temperature,
-    humidity,
-    ph
+sensorData = {
+  soil_moisture,
+  temperature,
+  humidity,
+  ph,
+  pump
   };
 
   console.log("📡 Data received:", sensorData);
